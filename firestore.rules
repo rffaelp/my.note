@@ -1,0 +1,28 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+    function validTask() {
+      let d = request.resource.data;
+      return d.keys().hasAll(['title', 'description', 'priority', 'done', 'createdAt', 'updatedAt'])
+        && d.keys().hasOnly(['title', 'description', 'priority', 'done', 'createdAt', 'updatedAt'])
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 120
+        && d.title.matches('.*[^ ].*')
+        && d.description is string && d.description.size() <= 1000
+        && d.priority in ['baixa', 'normal', 'alta']
+        && d.done is bool
+        && d.createdAt is timestamp && d.updatedAt is timestamp
+        && d.updatedAt == request.time;
+    }
+    match /users/{uid}/tasks/{taskId} {
+      allow read, delete: if isOwner(uid);
+      allow create: if isOwner(uid) && validTask()
+        && request.resource.data.createdAt == request.time;
+      allow update: if isOwner(uid) && validTask()
+        && request.resource.data.createdAt == resource.data.createdAt;
+    }
+    // Outros caminhos não têm permissão de acesso.
+  }
+}

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="pt-BR" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#ea580c" />
+    <meta
+      name="description"
+      content="Organize suas tarefas com uma conta pessoal e sincronização em tempo real."
+    />
+    <title>my.Notes — Minhas notas e tarefas</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="./"> my<span class="brand-dot">.</span>Notes</a>
+
+      <div class="topbar-actions">
+        <button
+          id="theme-toggle"
+          class="icon-button"
+          aria-label="Alternar tema"
+          title="Alternar tema"
+        >
+          <span class="theme-icon">🌙</span>
+        </button>
+        <button id="logout" class="secondary" hidden>Sair da conta</button>
+      </div>
+    </header>
+
+    <main>
+      <p id="message" class="notice" role="status" aria-live="polite">
+        Conectando ao Firebase…
+      </p>
+      <section id="setup" hidden></section>
+
+      <!-- TELA DE AUTENTICAÇÃO CENTRALIZADA -->
+      <section id="auth-view" class="auth-centered-layout">
+        <div class="card auth-card">
+          <span class="eyebrow">BEM-VINDO AO MY.NOTES</span>
+          <h2 id="auth-heading">Vamos começar?</h2>
+          <p id="auth-description" class="muted">
+            Entre com seu e-mail e senha para acessar suas tarefas.
+          </p>
+
+          <div class="switcher" aria-label="Acesso à conta">
+            <button type="button" id="login-tab" aria-pressed="true">
+              Entrar
+            </button>
+            <button type="button" id="signup-tab" aria-pressed="false">
+              Criar conta
+            </button>
+          </div>
+
+          <form id="auth-form">
+            <fieldset id="auth-fields">
+              <label for="email">E-mail</label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autocomplete="email"
+                placeholder="voce@exemplo.com"
+                required
+                maxlength="254"
+              />
+
+              <label for="password">Senha</label>
+              <div class="password-wrapper">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autocomplete="current-password"
+                  required
+                  placeholder="Sua senha"
+                />
+                <button
+                  type="button"
+                  class="toggle-password-btn"
+                  data-target="password"
+                  aria-label="Exibir senha"
+                  title="Exibir senha"
+                >
+                  <span class="eye-icon">👁️</span>
+                </button>
+              </div>
+
+              <div id="confirm-group" hidden>
+                <label for="confirm-password">Confirme a senha</label>
+                <div class="password-wrapper">
+                  <input
+                    id="confirm-password"
+                    type="password"
+                    autocomplete="new-password"
+                    placeholder="Repita sua senha"
+                    disabled
+                  />
+                  <button
+                    type="button"
+                    class="toggle-password-btn"
+                    data-target="confirm-password"
+                    aria-label="Exibir senha"
+                    title="Exibir senha"
+                  >
+                    <span class="eye-icon">🫥</span>
+                  </button>
+                </div>
+                <p class="help">
+                  Use pelo menos 6 caracteres ou a política definida no seu
+                  projeto.
+                </p>
+              </div>
+
+              <button class="primary full" id="auth-submit" type="submit">
+                Entrar na minha conta <span aria-hidden="true">→</span>
+              </button>
+            </fieldset>
+          </form>
+        </div>
+
+        <div class="intro-bottom">
+          <h2>Sua rotina sob controle.</h2>
+          <p>
+            Simplifique seu dia a dia, organize suas metas e acompanhe seu
+            progresso de forma rápida e intuitiva.
+          </p>
+        </div>
+      </section>
+
+      <!-- TELA DO DASHBOARD -->
+      <section id="dashboard" hidden>
+        <div class="dashboard-header-new">
+          <div class="dash-title-group">
+            <h1>Meu Painel de Metas.</h1>
+            <p id="account" class="user-badge"></p>
+          </div>
+
+          <!-- BARRAS DE STATUS -->
+          <div class="stats-bar">
+            <div class="stat-item">
+              <span class="stat-label">Total</span>
+              <strong id="total">0</strong>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item">
+              <span class="stat-label">Pendentes</span>
+              <strong id="pending">0</strong>
+            </div>
+            <div class="stat-divider"></div>
+            <div class="stat-item accent">
+              <span class="stat-label">Concluídas</span>
+              <strong id="completed">0</strong>
+            </div>
+            <span id="sync-status" class="sync" role="status">Conectando…</span>
+          </div>
+        </div>
+
+        <!-- EXIBIÇÃO DAS TAREFAS -->
+        <div class="workspace-inverted">
+          <section class="card task-panel" aria-label="Lista de tarefas">
+            <div class="list-heading">
+              <h2>Minhas Atividades</h2>
+              <span id="visible-count" class="muted">0 anotações</span>
+            </div>
+
+            <div class="filters-bar">
+              <div class="filters" aria-label="Filtrar tarefas">
+                <button type="button" data-filter="all" aria-pressed="true">
+                  Todas
+                </button>
+                <button
+                  type="button"
+                  data-filter="pending"
+                  aria-pressed="false"
+                >
+                  Pendentes
+                </button>
+                <button type="button" data-filter="done" aria-pressed="false">
+                  Concluídas
+                </button>
+              </div>
+              <div class="search-box">
+                <label class="sr-only" for="search">Filtrar anotações</label>
+                <input
+                  id="search"
+                  type="search"
+                  placeholder="Filtrar por palavras-chave…"
+                  maxlength="120"
+                />
+              </div>
+            </div>
+
+            <p id="empty" class="empty">Carregando suas tarefas…</p>
+            <ul id="task-list" class="task-list"></ul>
+          </section>
+
+          <!-- Criação das anotações -->
+          <section class="card editor-side">
+            <span class="eyebrow">NOVA ANOTAÇÃO</span>
+            <h2 id="editor-heading">Registrar meta ou tarefa</h2>
+            <form id="task-form">
+              <fieldset id="task-fields">
+                <label for="task-title">Título da atividade</label>
+                <input
+                  id="task-title"
+                  maxlength="120"
+                  required
+                  placeholder="Ex. Lista de compras"
+                />
+
+                <label for="task-description"
+                  >Descrição ou notas rápidas
+                  <span class="optional">(opcional)</span></label
+                >
+                <textarea
+                  id="task-description"
+                  rows="5"
+                  maxlength="1000"
+                  placeholder="Detalhe sua anotação, coloque seu a fazer, links, observações, etc..."
+                ></textarea>
+
+                <button id="save-task" class="primary full" type="submit">
+                  Salvar anotação +
+                </button>
+                <button
+                  id="cancel-edit"
+                  class="secondary full"
+                  type="button"
+                  hidden
+                >
+                  Descartar alteração
+                </button>
+              </fieldset>
+            </form>
+          </section>
+        </div>
+      </section>
+
+      <!-- POP-UP -->
+      <div id="modal-overlay" class="modal-backdrop" hidden>
+        <div class="modal-card card">
+          <button
+            id="modal-close"
+            class="modal-close-btn"
+            aria-label="Fechar pop-up"
+          >
+            &times;
+          </button>
+          <h2 id="modal-title" class="modal-heading">Nome da Anotação</h2>
+          <div id="modal-date" class="modal-date-text">📅 Data: --/--/----</div>
+          <div class="modal-body-content">
+            <label>Descrição</label>
+            <p id="modal-description" class="modal-desc-text">
+              Sem descrição cadastrada.
+            </p>
+          </div>
+          <div class="modal-footer-actions">
+            <button id="modal-edit-btn" class="secondary">Editar</button>
+            <button id="modal-delete-btn" class="primary delete-btn">
+              Excluir
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer>
+      <div class="footer-content">
+        <span class="copyright"
+          >Copyright © 2026 my.Notes. Todos os direitos reservados.
+        </span>
+      </div>
+    </footer>
+  </body>
+</html>
